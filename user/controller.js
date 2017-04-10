@@ -3,15 +3,16 @@ var User = mongoose.model('Users');
 
 
 
-
 exports.createUser = function(req, res) {
 
     var new_User = new User(req.body);
     new_User.save(function (err, user) {
-        if(err) {
-            res.send("An account already exists with this Email");
+        if(!user){
+            res.send("Error" + err);
         }
+
         else {
+
             res.send("Account created Successfully ! Thanks for signing up");
         }
 
@@ -19,19 +20,19 @@ exports.createUser = function(req, res) {
 
 };
 
+///^(([a-zA-Z]{2,20})+[ ]+([a-zA-Z]{2,20}))+[ ]+([a-zA-Z]{2,20})$/
 
 
-exports.logInUser = function (req, res) {
+exports.logInUser = function (req, res, next) {
 
     User.findOne({email: req.body.email, password: req.body.password}, function (err, user) {
 
-        if(!user) {
-            res.send("No user found");    }
-        else {
-            res.send("Welcome User " + user.firstname);
-        }
+                if(!user) {
+                    res.send("No user found");    }
+                else {
+                    res.send("Welcome User " + user.firstname);
+                }
     });
-
 };
 
 
