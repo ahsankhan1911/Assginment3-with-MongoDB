@@ -7,7 +7,8 @@ var EmailValidator = [
     validate({
             validator: 'matches',
             arguments: /^[\w.]+[@]+[a-zA-Z]+.com$/,
-            message: 'not a valid email address'
+            unique: true,
+            message: 'Same or Invalid email address'
     })
 ];
 
@@ -17,13 +18,13 @@ var PhoneValidator = [
         arguments: /^923[1-9]{9}$/,
         message: 'its not valid phone number'
     })
-]
+];
 
 var UserSchema = new Schema({
 
         firstname: String,
         lastname: String,
-        email: {type: String, unique: true, lowercase: true, validate: EmailValidator },
+        email: {type: String, lowercase: true, validate: EmailValidator },
         phone: {type: Number, required: true , validate: PhoneValidator},
         password: {type: String, required: true}
     }
