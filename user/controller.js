@@ -1,7 +1,8 @@
 var mongoose =require('mongoose');
 var User = mongoose.model('Users');
 
-
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
 //var LocalStrategy = require('passport-local').Strategy;
 
 
@@ -9,7 +10,35 @@ var User = mongoose.model('Users');
 // var boom = require('express-boom');
 // var boom2 = require('boom');
 
+passport.use(new LocalStrategy({
+        usernameField: 'email',
+        passwordField: 'password'
+    },
+    function(username, password, done) {
+        User.findOne({ email: username , password: password}, function (err, user) {
+            if (err) {
+                return done(err);
+            }
+            if (!user) {
+                return done(null, false);
+            }
 
+            return done(null, user);
+        });
+    }
+
+));
+passport.serializeUser(function(user, done) {
+    done(null, user.id);
+    console.log(user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+    User.findById(id, function (err, user) {
+        done(err, user);
+        console.log(id)
+    });
+});
 
 exports.createUser = function(req, res) {
 
@@ -32,8 +61,18 @@ exports.createUser = function(req, res) {
 ///^(([a-zA-Z]{2,20})+[ ]+([a-zA-Z]{2,20}))+[ ]+([a-zA-Z]{2,20})$/
 
 
-exports.logInUser = function (req, res) {
+exports.logInUser = function (req, res , next) {
 
+    passport.authenticate('local', function (err, user) {
+
+        if(!user){
+            return res.send("Incorrect email or password")
+        }
+        else {
+            res.send("Welcome User " + user.firstname);
+        }
+
+    })(req, res, next);
 
 };
 
