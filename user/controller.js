@@ -1,18 +1,17 @@
 var mongoose =require('mongoose');
 var User = mongoose.model('Users');
-
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
-//var LocalStrategy = require('passport-local').Strategy;
-
-
-
+var BearerStrategy = require('passport-http-bearer').Strategy;
+var jwt = require('jsonwebtoken');
 // var boom = require('express-boom');
 // var boom2 = require('boom');
 
+
+
+
 passport.use(new LocalStrategy({
-        usernameField: 'email',
-        passwordField: 'password'
+        usernameField: 'email'
     },
     function(username, password, done) {
         User.findOne({ email: username , password: password}, function (err, user) {
@@ -28,21 +27,26 @@ passport.use(new LocalStrategy({
     }
 
 ));
-passport.serializeUser(function(user, done) {
-    done(null, user.id);
-    console.log(user.id);
-});
 
-passport.deserializeUser(function(id, done) {
-    User.findById(id, function (err, user) {
-        done(err, user);
-        console.log(id)
-    });
-});
+passport.use(new BearerStrategy({},
+function(token, done){
+   User.findOne({}, function (err, user) {
+       if (err) {
+           return done(err);
+       }
+       if(!user){
+           return done(null, false);
+       }
+       else {
+
+           return done(null, user);
+       }
+
+   })
+}
+));
 
 exports.createUser = function(req, res) {
-
-
     var new_User = new User(req.body);
     new_User.save(function (err, user) {
         if(err){
@@ -50,16 +54,12 @@ exports.createUser = function(req, res) {
         }
 
         else {
-
             res.send("Account created Successfully ! Thanks for signing up");
         }
     });
 
 
 };
-
-///^(([a-zA-Z]{2,20})+[ ]+([a-zA-Z]{2,20}))+[ ]+([a-zA-Z]{2,20})$/
-
 
 exports.logInUser = function (req, res , next) {
 
@@ -69,12 +69,13 @@ exports.logInUser = function (req, res , next) {
             return res.send("Incorrect email or password")
         }
         else {
-            res.send("Welcome User " + user.firstname);
+            var myToken = jwt.sign({},'secret');
+            res.send("Welcome User " + user.firstname + " token = " + myToken);
         }
 
     })(req, res, next);
 
-};
+ };
 
 
 exports.userProfile = function (req, res){
