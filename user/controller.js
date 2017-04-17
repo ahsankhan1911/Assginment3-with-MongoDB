@@ -8,50 +8,7 @@ var jwt = require('jsonwebtoken');
 // var boom2 = require('boom');
 
 
- var   myToken = jwt.sign({
-         id: user._id,
-         email: req.body.email
-     }, "secret",
-     {expiresIn: 60000}
- );
-
-// passport.use(new LocalStrategy({
-//         usernameField: 'email'
-//     },
-//     function(username, password, done) {
-//         User.findOne({ email: username , password: password}, function (err, user) {
-//             if (err) {
-//                 return done(err);
-//             }
-//             if (!user) {
-//                 return done(null, false);
-//             }
-//             else {
-//
-//                 return done(null, user);
-//             }
-//         });
-//     }
-//
-// ));
-
-// passport.use(new BearerStrategy({},
-// function(token, done){
-//    User.findOne({token: token}, function (err, user) {
-//        if (err) {
-//            return done(err);
-//        }
-//        if(!user){
-//            return done(null, false);
-//        }
-//        else {
-//
-//            return done(null, user, {scope: 'all'});
-//        }
-//
-//    })
-// }
-// ));
+ var myToken;
 
 
 exports.createUser = function(req, res) {
@@ -76,19 +33,19 @@ exports.logInUser = function (req, res) {
         if (!user) {
             res.send("Invalid email or password");
         }
+
         else {
-
-
-            // jwt.decode(myToken, {complete: true, json: true});
-            // console.log(myToken);
+            
+            myToken = jwt.sign({
+                 id: user._id,
+                 email: req.body.email
+                  }, "secret",
+                  {expiresIn: 10 * 60000}
+       );
+        
             res.send("Welcome " + myToken);
-
-
-
-
-
-
         }
+
     });
 };
 
@@ -97,16 +54,18 @@ exports.logInUser = function (req, res) {
 
 
     exports.userProfile = function (req, res) {
+var decode = jwt.verify(myToken, 'secret', function(err, decoded){
+User.findOne({email: decoded.email}, function(err2, user){
 
-        User.findOne({email: req.params.email}, function (err, user) {
-
-            if (!user) {
-                res.send("NO user found");
+   if (!user) {
+                res.send("Invalid Token");
             }
             else {
                 res.send(user);
             }
-        });
+});
+});
+
     };
 
 
@@ -114,12 +73,22 @@ exports.logInUser = function (req, res) {
 
 exports.showUser = function (req, res) {
 
-  res.send(myToken);
+var decode = jwt.verify(myToken, 'secret', function(err, decoded){
+User.find({}, function(err2, user){
+
+   if (!user) {
+                res.send("Invalid Token");
+            }
+            else {
+                res.send(user);
+            }
+});
+});
+
 };
 
-    // var decoded = jwt.decode(myToken, {complete: true});
-    // console.log(decoded.email);
-    // };
+    
+    
 
 
 

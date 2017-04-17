@@ -20,7 +20,7 @@ router.get('/show-user',user.showUser);
 router.post('/delete-user', user.deleteUser);
 
 
-router.get('/user-profile/:email', user.userProfile);
+router.get('/user-profile', user.userProfile);
 
 module.exports = router;
 
