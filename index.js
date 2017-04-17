@@ -22,10 +22,6 @@ app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 
-app.use(passport.initialize());
-app.use(passport.session());
-
-
 app.use('/users', require('./user'));
 
 app.listen(port, function () {
